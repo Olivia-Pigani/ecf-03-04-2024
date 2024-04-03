@@ -1,0 +1,148 @@
+#mysql, redis, 4 ms, front, network
+
+version: '3.8'
+
+services:
+  front:
+    container_name: front
+    build:
+     context: ./client
+     dockerfile: Dockerfile
+    ports:
+      - ${REACT_APP_PORT}:80
+    environment:
+      REACT_CLIENT_URL: ${REACT_CLIENT_URL}
+      REACT_APP_ENVIRONMENT: ${REACT_APP_ENVIRONMENT}
+      REACT_APP_AUTHENTICATION_SERVICE_URL: http://localhost:7000
+      REACT_APP_COMMON_DATA_SERVICE_URL: http://localhost:9000
+      REACT_APP_PAYMENT_SERVICE_URL: http://localhost:9050
+      REACT_APP_SEARCH_SUGGESTION_SERVICE_URL: http://localhost:10000
+    depends_on:
+      - authentication-service
+      - common-data-service
+      - search-suggestion-service
+    networks:
+      - mynetwork
+
+
+
+  payment-service:
+    container_name: payment-service
+    build:
+       context: ./server/payment-service
+       dockerfile: Dockerfile
+    ports:
+      - ${PAYMENT_SERVICE_PORT}:${PAYMENT_SERVICE_PORT}
+    environment:
+       PORT: ${PAYMENT_SERVICE_PORT}
+       DB_PORT: ${DB_PORT}
+       DB_SCHEMA: ${DB_SCHEMA}
+       DB_USER: ${DB_USER}
+       DB_PASS: ${DB_PASS}
+       PAYMENT_SERVICE_URL: http://localhost:${PAYMENT_SERVICE_PORT}
+    networks:
+      - mynetwork
+
+  authentication-service:
+    container_name: authentication-service
+    build:
+     context: ./server/authentication-service
+     dockerfile: Dockerfile
+    ports:
+      - "${AUTHENTICATION_SERVICE_PORT}:${AUTHENTICATION_SERVICE_PORT}"
+    environment:
+       PORT: ${AUTHENTICATION_SERVICE_PORT}
+       ACTIVE_PROFILE: ${ACTIVE_PROFILE}
+       DB_HOST: db
+       DB_PORT: ${DB_PORT}
+       DB_SCHEMA: ${DB_SCHEMA}
+       DB_USER: ${DB_USER}
+       DB_PASS: ${DB_PASS}
+       AUTHENTICATION_SERVICE_URL: http://localhost:${AUTHENTICATION_SERVICE_PORT}
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+
+  common-data-service:
+    container_name: common-data-service
+    build:
+      context: ./server/common-data-service
+      dockerfile: Dockerfile
+    ports:
+      - "${COMMON_DATA_SERVICE_PORT}:${COMMON_DATA_SERVICE_PORT}"
+    environment:
+      PORT: ${COMMON_DATA_SERVICE_PORT}
+      DB_HOST: db
+      DB_PORT: ${DB_PORT}
+      DB_SCHEMA: ${DB_SCHEMA}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_HOST: redis
+      ACTIVE_PROFILE: ${ACTIVE_PROFILE}
+      COMMON_DATA_SERVICE_URL: http://localhost:${COMMON_DATA_SERVICE_PORT}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - mynetwork
+
+  search-suggestion-service:
+    container_name: search-suggestion-service
+    build:
+      context: ./server/search-suggestion-service
+      dockerfile: Dockerfile
+    ports:
+      - "${SEARCH_SUGGESTION_SERVICE_PORT}:${SEARCH_SUGGESTION_SERVICE_PORT}"
+    environment:
+       PORT: ${SEARCH_SUGGESTION_SERVICE_PORT}
+       ACTIVE_PROFILE: ${ACTIVE_PROFILE}
+       DB_PORT: ${DB_PORT}
+       DB_SCHEMA: ${DB_SCHEMA}
+       DB_USER: ${DB_USER}
+       DB_PASS: ${DB_PASS}
+       SEARCH_SUGGESTION_SERVICE_URL: http://localhost:${SEARCH_SUGGESTION_SERVICE_PORT}
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+
+
+  db:
+    image: mysql
+    container_name: my_db
+    restart: always
+    ports:
+      - 3307:${DB_PORT}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - mynetwork
+
+
+
+  redis:
+    image: redis:latest
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    volumes:
+      - redis-data:/data
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  db-data:
+  redis-data:
