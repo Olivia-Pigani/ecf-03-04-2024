@@ -1,6 +1,6 @@
 #mysql, redis, 4 ms, front, network
 
-version: '3.8'
+version: '3'
 
 services:
   front:
@@ -37,8 +37,8 @@ services:
        PORT: ${PAYMENT_SERVICE_PORT}
        DB_PORT: ${DB_PORT}
        DB_SCHEMA: ${DB_SCHEMA}
-       DB_USER: ${DB_USER}
-       DB_PASS: ${DB_PASS}
+       DB_USER: root
+       DB_PASS: ${MYSQL_ROOT_PASSWORD}
        PAYMENT_SERVICE_URL: http://localhost:${PAYMENT_SERVICE_PORT}
     networks:
       - mynetwork
@@ -56,8 +56,8 @@ services:
        DB_HOST: db
        DB_PORT: ${DB_PORT}
        DB_SCHEMA: ${DB_SCHEMA}
-       DB_USER: ${DB_USER}
-       DB_PASS: ${DB_PASS}
+       DB_USER: root
+       DB_PASS: ${MYSQL_ROOT_PASSWORD}
        AUTHENTICATION_SERVICE_URL: http://localhost:${AUTHENTICATION_SERVICE_PORT}
     depends_on:
       - db
@@ -77,8 +77,8 @@ services:
       DB_HOST: db
       DB_PORT: ${DB_PORT}
       DB_SCHEMA: ${DB_SCHEMA}
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
+      DB_USER: root
+      DB_PASS: ${MYSQL_ROOT_PASSWORD}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_HOST: redis
@@ -102,8 +102,8 @@ services:
        ACTIVE_PROFILE: ${ACTIVE_PROFILE}
        DB_PORT: ${DB_PORT}
        DB_SCHEMA: ${DB_SCHEMA}
-       DB_USER: ${DB_USER}
-       DB_PASS: ${DB_PASS}
+       DB_USER: root
+       DB_PASS: ${MYSQL_ROOT_PASSWORD}}
        SEARCH_SUGGESTION_SERVICE_URL: http://localhost:${SEARCH_SUGGESTION_SERVICE_PORT}
     depends_on:
       - db
@@ -120,7 +120,7 @@ services:
       - 3307:${DB_PORT}
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      DB_SCHEMA: ${MYSQL_DATABASE}
     volumes:
       - db-data:/var/lib/mysql
     networks:
