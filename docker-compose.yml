@@ -103,7 +103,7 @@ services:
        DB_PORT: ${DB_PORT}
        DB_SCHEMA: ${DB_SCHEMA}
        DB_USER: root
-       DB_PASS: ${MYSQL_ROOT_PASSWORD}}
+       DB_PASS: ${MYSQL_ROOT_PASSWORD}
        SEARCH_SUGGESTION_SERVICE_URL: http://localhost:${SEARCH_SUGGESTION_SERVICE_PORT}
     depends_on:
       - db
